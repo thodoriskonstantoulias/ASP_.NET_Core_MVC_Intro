@@ -18,12 +18,35 @@ namespace PieShop.Controllers
             _pieRepository = pieRepository;
             _categoryRepository = categoryRepository;
         }
-        public ViewResult List()
+        //public ViewResult List()
+        //{
+        //    PiesListViewModel piesVM = new PiesListViewModel();
+        //    piesVM.Pies = _pieRepository.GetAllPies();
+        //    piesVM.CurrentCategory = "Cheesecakes";
+        //    return View(piesVM);
+        //}
+        public ViewResult List(string category)
         {
-            PiesListViewModel piesVM = new PiesListViewModel();
-            piesVM.Pies = _pieRepository.GetAllPies();
-            piesVM.CurrentCategory = "Cheesecakes";
-            return View(piesVM);
+            IEnumerable<Pie> pies;
+            string currentCategory;
+
+            if (string.IsNullOrEmpty(category))
+            {
+                pies = _pieRepository.GetAllPies().OrderBy(p => p.PieId);
+                currentCategory = "All pies";
+            }
+            else
+            {
+                pies = _pieRepository.GetAllPies().Where(p => p.Category.CategoryName == category)
+                    .OrderBy(p => p.PieId);
+                currentCategory = _categoryRepository.GetAllCategories().FirstOrDefault(c => c.CategoryName == category)?.CategoryName;
+            }
+
+            return View(new PiesListViewModel
+            {
+                Pies = pies,
+                CurrentCategory = currentCategory
+            });
         }
         public IActionResult Details(int id)
         {
